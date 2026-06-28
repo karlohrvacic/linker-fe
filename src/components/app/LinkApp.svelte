@@ -118,12 +118,32 @@
     }
 
     void safePull();
-    const interval = setInterval(() => { void safePull(); }, 60_000);
-    const onVisible = () => { if (document.visibilityState === 'visible') void safePull(); };
+
+    // Near-real-time without a server push channel: poll on a short interval while
+    // the tab is visible (paused when hidden to save battery/data), and pull
+    // immediately whenever the app wakes — regaining focus or visibility, coming
+    // back online, or restoring from bfcache. So a change made on another device
+    // shows up within ~10s while you're watching, and instantly when you return.
+    const POLL_MS = 10_000;
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const startPolling = () => { if (interval == null) interval = setInterval(() => void safePull(), POLL_MS); };
+    const stopPolling = () => { if (interval != null) { clearInterval(interval); interval = null; } };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') { void safePull(); startPolling(); }
+      else stopPolling();
+    };
+    const onWake = () => void safePull();
     document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onWake);
+    window.addEventListener('online', onWake);
+    window.addEventListener('pageshow', onWake);
+    if (document.visibilityState === 'visible') startPolling();
     return () => {
-      clearInterval(interval);
+      stopPolling();
       document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onWake);
+      window.removeEventListener('online', onWake);
+      window.removeEventListener('pageshow', onWake);
     };
   });
 

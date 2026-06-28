@@ -176,7 +176,7 @@ export function scheduleSync(
   store: LinkStore,
   deps: SyncDeps,
   onAuthError?: () => void,
-  delayMs = 2000,
+  delayMs = 1000,
 ): { triggerPush: () => void; dispose: () => void } {
   let timer: ReturnType<typeof setTimeout> | null = null;
   function triggerPush(): void {

@@ -7,7 +7,8 @@
  * local-first experience.
  */
 
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
+import { locale } from './i18n';
 
 export const API_BASE: string =
   (import.meta.env.PUBLIC_API_BASE as string | undefined) ?? 'https://ladica-api.hrva.cc';
@@ -66,7 +67,7 @@ export async function requestMagicLink(email: string): Promise<void> {
   const res = await fetch(API_BASE + '/api/v1/auth/magic-link', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, lang: get(locale) }),
   });
   if (!res.ok) throw new Error(`magic-link request failed: HTTP ${res.status}`);
 }
