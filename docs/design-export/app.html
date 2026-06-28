@@ -1,0 +1,712 @@
+<!doctype html>
+<!--
+  Ladica — dead-simple link saver (Croatian, mobile-first / Android). link.hrva.cc · HrvaLabs.net
+  One self-contained file. Saved links live in the phone's browser (localStorage).
+  Actions: Otvori (open), Kopiraj (copy), Podijeli (share), Obriši (delete + undo),
+  Zalijepi iz međuspremnika (paste from clipboard) when adding.
+-->
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#15803d" />
+  <title>Ladica · spremi i otvori jednim dodirom</title>
+  <meta name="description" content="Ladica — spremi linkove i otvori ih jednim dodirom. Spremljeno na uređaju." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icon-180.png" />
+  <meta property="og:title" content="Ladica" />
+  <meta property="og:image" content="https://link.hrva.cc/assets/og.png" />
+  <style>
+    /* ─── tokens (human / approachable: one calm green + per-category colors) ── */
+    :root {
+      --bg:        #eef2ef;
+      --app-bg:    #f6f8f6;
+      --surface:   #ffffff;
+      --fg:        #1c2320;
+      --muted:     #687570;
+      --border:    #e2e8e3;
+      --accent:    #15803d;   /* primary action — Otvori, Spremi, Dodaj */
+      --accent-dk: #116e34;
+      --danger:    #c0413a;
+
+      /* category accents */
+      --cat-cook:   #d9690f;
+      --cat-shop:   #2563eb;
+      --cat-travel: #0e8f96;
+      --cat-other:  #5b6b78;
+
+      --font: -apple-system, "Roboto", "Segoe UI", system-ui, sans-serif;
+
+      --radius:   14px;
+      --radius-lg: 22px;
+      --shadow:   0 1px 2px rgba(20,40,30,.05), 0 6px 18px rgba(20,40,30,.06);
+      --shadow-up: 0 -2px 18px rgba(20,40,30,.07);
+      --tap: 52px;            /* comfortable Android touch target */
+    }
+
+    * , *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
+    }
+    button { font: inherit; cursor: pointer; color: inherit; border: 0; background: none; }
+    svg { display: block; }
+
+    /* ─── phone-width app shell ──────────────────────────────────────── */
+    .app {
+      max-width: 460px;
+      min-height: 100dvh;
+      margin-inline: auto;
+      background: var(--app-bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 0 1px var(--border);
+    }
+    @media (min-width: 480px) {
+      body { padding: 0; background: var(--bg); }
+      .app { min-height: 100dvh; }
+    }
+
+    /* ─── header ─────────────────────────────────────────────────────── */
+    .appbar {
+      position: sticky; top: 0; z-index: 20;
+      background: color-mix(in srgb, var(--app-bg) 88%, transparent);
+      backdrop-filter: blur(10px);
+      padding: 18px 18px 12px;
+      padding-top: max(18px, env(safe-area-inset-top));
+      border-bottom: 1px solid var(--border);
+    }
+    .appbar h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .appbar .brandmark {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: var(--accent);
+      display: grid; place-items: center; color: #fff; flex: none;
+    }
+    .appbar .brandmark svg { width: 18px; height: 18px; }
+    .appbar p { margin: 4px 0 0 39px; color: var(--muted); font-size: 14px; }
+
+    /* ─── category filter row ────────────────────────────────────────── */
+    .filters {
+      display: flex; gap: 8px;
+      padding: 14px 18px 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: none;
+      display: inline-flex; align-items: center; gap: 7px;
+      min-height: 42px;
+      padding: 0 15px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--fg);
+      font-size: 15px; font-weight: 600;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .chip .dot { width: 9px; height: 9px; border-radius: 999px; flex: none; }
+    .chip .cnt { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .chip[aria-pressed="true"] {
+      border-color: var(--c, var(--accent));
+      background: color-mix(in srgb, var(--c, var(--accent)) 12%, var(--surface));
+      color: color-mix(in srgb, var(--c, var(--accent)) 72%, var(--fg));
+    }
+    .chip[aria-pressed="true"] .cnt { color: inherit; }
+
+    /* ─── list ───────────────────────────────────────────────────────── */
+    .list {
+      flex: 1;
+      padding: 10px 18px calc(var(--tap) + 64px);
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 16px 16px 14px;
+    }
+    .card .catline {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 700; letter-spacing: .01em;
+      color: color-mix(in srgb, var(--c, var(--cat-other)) 70%, #14241b);
+      margin-bottom: 8px;
+    }
+    .card .catline svg { width: 15px; height: 15px; }
+    .card .title {
+      margin: 0;
+      font-size: 18px; font-weight: 700; letter-spacing: -0.01em;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+    .card .url {
+      margin-top: 3px;
+      color: var(--muted); font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .open-btn {
+      margin-top: 13px; width: 100%;
+      min-height: var(--tap);
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      background: var(--accent); color: #fff;
+      border-radius: var(--radius);
+      font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+      transition: transform .05s, background .15s;
+    }
+    .open-btn svg { width: 19px; height: 19px; }
+    .open-btn:hover { background: var(--accent-dk); }
+    .open-btn:active { transform: translateY(1px); }
+
+    .subactions {
+      margin-top: 8px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    }
+    .sub {
+      min-height: 44px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border-radius: 11px;
+      color: var(--muted); font-size: 14px; font-weight: 600;
+      transition: background .15s, color .15s;
+    }
+    .sub svg { width: 17px; height: 17px; }
+    .sub:hover { background: color-mix(in srgb, var(--fg) 5%, transparent); color: var(--fg); }
+    .sub.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+
+    /* ─── empty state ────────────────────────────────────────────────── */
+    .empty {
+      margin: 36px auto 0; max-width: 280px; text-align: center; color: var(--muted);
+    }
+    .empty .ill {
+      width: 76px; height: 76px; margin: 0 auto 16px;
+      border-radius: 22px;
+      background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+      display: grid; place-items: center; color: var(--accent);
+    }
+    .empty .ill svg { width: 36px; height: 36px; }
+    .empty h2 { margin: 0 0 6px; font-size: 18px; color: var(--fg); }
+    .empty p { margin: 0; font-size: 15px; }
+
+    /* brand credit at end of list */
+    .credit { text-align: center; color: var(--muted); font-size: 12.5px; line-height: 1.5; padding: 22px 8px 6px; }
+    .credit a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ─── sticky add bar ─────────────────────────────────────────────── */
+    .addbar {
+      position: sticky; bottom: 0; z-index: 20;
+      padding: 12px 18px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: color-mix(in srgb, var(--app-bg) 90%, transparent);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      box-shadow: var(--shadow-up);
+    }
+    .add-btn {
+      width: 100%; min-height: 56px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--accent); color: #fff;
+      border-radius: 16px;
+      font-size: 18px; font-weight: 750; letter-spacing: -0.01em;
+      transition: transform .05s, background .15s;
+    }
+    .add-btn svg { width: 22px; height: 22px; }
+    .add-btn:hover { background: var(--accent-dk); }
+    .add-btn:active { transform: translateY(1px); }
+
+    /* ─── bottom sheet (add) ─────────────────────────────────────────── */
+    .scrim {
+      position: fixed; inset: 0; z-index: 40;
+      background: rgba(18,28,22,.42);
+      opacity: 0; pointer-events: none;
+      transition: opacity .22s;
+    }
+    .scrim.open { opacity: 1; pointer-events: auto; }
+    .sheet {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+      max-width: 460px; margin-inline: auto;
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 8px 20px 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      transform: translateY(110%);
+      transition: transform .26s cubic-bezier(.22,.61,.36,1);
+      box-shadow: 0 -10px 40px rgba(15,25,20,.18);
+    }
+    .sheet.open { transform: translateY(0); }
+    .grip { width: 42px; height: 5px; border-radius: 999px; background: var(--border); margin: 0 auto 14px; }
+    .sheet h2 { margin: 0 0 14px; font-size: 21px; font-weight: 750; letter-spacing: -0.01em; }
+
+    .paste-btn {
+      width: 100%; min-height: var(--tap);
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, var(--border));
+      background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+      color: var(--accent-dk);
+      border-radius: var(--radius);
+      font-size: 16px; font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .paste-btn svg { width: 19px; height: 19px; }
+    .paste-btn:active { transform: translateY(1px); }
+
+    .field { margin-bottom: 13px; }
+    .field label { display: block; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+    .field input {
+      width: 100%; min-height: var(--tap);
+      padding: 0 15px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--fg);
+      font: inherit; font-size: 16px;
+    }
+    .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+
+    .catpick { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .catpick button {
+      flex: 1 1 auto; min-width: calc(50% - 4px); min-height: 48px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); font-size: 15px; font-weight: 650;
+    }
+    .catpick button svg { width: 17px; height: 17px; color: var(--c); }
+    .catpick button[aria-pressed="true"] {
+      border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface));
+      color: color-mix(in srgb, var(--c) 70%, var(--fg));
+    }
+
+    .hint { color: var(--danger); font-size: 14px; font-weight: 600; min-height: 20px; margin: -4px 0 10px; }
+
+    .sheet-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
+    .btn-save {
+      min-height: var(--tap); background: var(--accent); color: #fff;
+      border-radius: var(--radius); font-size: 17px; font-weight: 750;
+    }
+    .btn-save:hover { background: var(--accent-dk); }
+    .btn-cancel {
+      min-height: var(--tap); background: var(--surface); color: var(--fg);
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-size: 17px; font-weight: 650;
+    }
+
+    /* ─── focus visibility + motion (a11y) ──────────────────────────── */
+    .chip:focus-visible, .open-btn:focus-visible, .sub:focus-visible, .add-btn:focus-visible,
+    .paste-btn:focus-visible, .btn-save:focus-visible, .btn-cancel:focus-visible,
+    .catpick button:focus-visible, .snackbar button:focus-visible, .credit a:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      outline-offset: 2px;
+    }
+    .sub.danger:focus-visible { outline-color: color-mix(in srgb, var(--danger) 60%, transparent); }
+    .paste-btn:hover { background: color-mix(in srgb, var(--accent) 13%, var(--surface)); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sheet, .scrim { transition: none; }
+      .snackbar.show { animation: none; }
+      .open-btn, .add-btn, .btn-save, .paste-btn, .chip, .sub { transition: none; }
+    }
+
+    /* ─── snackbar (toast + undo) ────────────────────────────────────── */
+    .snackbar {
+      position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 50;
+      translate: -50% 0;
+      width: min(420px, calc(100% - 32px));
+      background: #20302a; color: #fff;
+      border-radius: 14px;
+      padding: 13px 16px;
+      display: none; align-items: center; justify-content: space-between; gap: 12px;
+      font-size: 15px; box-shadow: 0 8px 30px rgba(10,20,15,.3);
+    }
+    .snackbar.show { display: flex; animation: snackIn .22s ease; }
+    @keyframes snackIn { from { opacity: 0; transform: translateY(10px); translate: -50% 10px; } }
+    .snackbar button {
+      color: #7ee2a8; font-weight: 750; font-size: 15px;
+      padding: 6px 6px; white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" data-od-id="app">
+
+    <header class="appbar" data-od-id="appbar">
+      <h1>
+        <span class="brandmark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg>
+        </span>
+        Ladica
+      </h1>
+      <p>Spremi link i otvori ga jednim dodirom.</p>
+    </header>
+
+    <div class="filters" id="filters" role="group" aria-label="Kategorije"></div>
+
+    <main class="list" id="list" data-od-id="list"></main>
+
+    <div class="addbar" data-od-id="addbar">
+      <button class="add-btn" id="openAdd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Dodaj link
+      </button>
+    </div>
+  </div>
+
+  <!-- add sheet -->
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Dodaj novi link" inert>
+    <div class="grip"></div>
+    <h2>Novi link</h2>
+
+    <button class="paste-btn" id="pasteBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1.2"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
+      Zalijepi iz međuspremnika
+    </button>
+
+    <div class="field">
+      <label for="urlInput">Adresa (link)</label>
+      <input id="urlInput" type="url" inputmode="url" autocomplete="off" placeholder="https://..." />
+    </div>
+    <div class="field">
+      <label for="nameInput">Naziv (po želji)</label>
+      <input id="nameInput" type="text" autocomplete="off" placeholder="npr. Recept za sarmu" />
+    </div>
+
+    <label class="field" style="margin-bottom:8px"><span style="font-size:14px;font-weight:600;color:var(--muted)">Kategorija</span></label>
+    <div class="catpick" id="catpick"></div>
+
+    <p class="hint" id="hint"></p>
+
+    <div class="sheet-actions">
+      <button class="btn-cancel" id="cancelBtn">Odustani</button>
+      <button class="btn-save" id="saveBtn">Spremi link</button>
+    </div>
+  </section>
+
+  <!-- snackbar -->
+  <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+    <span id="snackText"></span>
+    <button id="snackAction" hidden>Poništi</button>
+  </div>
+
+  <script>
+  /* ── icons ──────────────────────────────────────────────────────────── */
+  const ICON = {
+    cook:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14l-1 9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 11V7a3 3 0 0 1 6 0"/><path d="M4 11h16"/></svg>',
+    shop:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.2 11.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.78L21 8H6"/></svg>',
+    travel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5 3 12l1-2.5 5.5 .8 4.5-5.3a2 2 0 0 1 3 2.6L17 12l3.8 1.4a1 1 0 0 1 .2 1.8l-2 1-3.2-1-2 4 .4 2-1.6.8z"/></svg>',
+    other:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg>',
+    open:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    copy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>',
+    share:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.1 10.9 15.9 6.1M8.1 13.1l7.8 4.8"/></svg>',
+    trash:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg>'
+  };
+
+  /* ── categories ─────────────────────────────────────────────────────── */
+  const CATS = [
+    { id: 'cook',   label: 'Kuhanje',    color: 'var(--cat-cook)',   icon: ICON.cook },
+    { id: 'shop',   label: 'Kupovina',   color: 'var(--cat-shop)',   icon: ICON.shop },
+    { id: 'travel', label: 'Putovanja',  color: 'var(--cat-travel)', icon: ICON.travel },
+    { id: 'other',  label: 'Ostalo',     color: 'var(--cat-other)',  icon: ICON.other }
+  ];
+  const catById = id => CATS.find(c => c.id === id) || CATS[3];
+
+  /* ── storage ────────────────────────────────────────────────────────── */
+  const KEY = 'moji-linkovi-v1';
+  const SEED_FLAG = 'moji-linkovi-seeded';
+
+  const SEED = [
+    { id: uid(), name: 'Coolinarika',          url: 'https://www.coolinarika.com',          cat: 'cook'   },
+    { id: uid(), name: 'Recept za sarmu',      url: 'https://www.coolinarika.com/recepti',  cat: 'cook'   },
+    { id: uid(), name: 'Konzum web trgovina',  url: 'https://www.konzum.hr',                cat: 'shop'   },
+    { id: uid(), name: 'Booking — smještaj',   url: 'https://www.booking.com',              cat: 'travel' },
+    { id: uid(), name: 'HAK — stanje na cestama', url: 'https://www.hak.hr',                cat: 'other'  }
+  ];
+
+  let links = load();
+  let activeFilter = 'all';     // 'all' | cat id
+  let pickedCat = 'cook';       // selection inside add sheet
+  let lastDeleted = null;       // { item, index } for undo
+  let undoTimer = null;
+
+  function uid(){ uid.n = (uid.n || 0) + 1; return 'l' + uid.n.toString(36) + Math.floor(performance.now()).toString(36); }
+
+  function load(){
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e){}
+    // first ever launch → seed example links once
+    if (!localStorage.getItem(SEED_FLAG)) {
+      try { localStorage.setItem(SEED_FLAG, '1'); } catch(e){}
+      save(SEED);
+      return SEED.slice();
+    }
+    return [];
+  }
+  function save(arr){
+    try { localStorage.setItem(KEY, JSON.stringify(arr || links)); } catch(e){}
+  }
+
+  /* ── rendering ──────────────────────────────────────────────────────── */
+  const elFilters = document.getElementById('filters');
+  const elList    = document.getElementById('list');
+
+  function renderFilters(){
+    const counts = { all: links.length };
+    CATS.forEach(c => counts[c.id] = links.filter(l => l.cat === c.id).length);
+
+    let html = chip('all', 'Sve', null, counts.all, 'var(--accent)');
+    CATS.forEach(c => { html += chip(c.id, c.label, c.color, counts[c.id], c.color); });
+    elFilters.innerHTML = html;
+  }
+  function chip(id, label, dotColor, count, color){
+    const pressed = activeFilter === id;
+    const dot = dotColor ? `<span class="dot" style="background:${dotColor}"></span>` : '';
+    return `<button class="chip" data-filter="${id}" aria-pressed="${pressed}" style="--c:${color}">
+      ${dot}${label}<span class="cnt">${count}</span></button>`;
+  }
+
+  function renderList(){
+    const items = activeFilter === 'all' ? links : links.filter(l => l.cat === activeFilter);
+    if (!items.length){ elList.innerHTML = emptyState() + creditHTML(); return; }
+
+    elList.innerHTML = items.map(l => {
+      const c = catById(l.cat);
+      const title = (l.name && l.name.trim()) ? l.name.trim() : prettyHost(l.url);
+      return `<article class="card" data-id="${l.id}" style="--c:${c.color}">
+        <span class="catline">${c.icon}${c.label}</span>
+        <h2 class="title">${esc(title)}</h2>
+        <div class="url">${esc(prettyHost(l.url))}</div>
+        <button class="open-btn" data-act="open" aria-label="Otvori: ${esc(title)}">${ICON.open}Otvori</button>
+        <div class="subactions">
+          <button class="sub" data-act="copy" aria-label="Kopiraj link: ${esc(title)}">${ICON.copy}Kopiraj</button>
+          <button class="sub" data-act="share" aria-label="Podijeli: ${esc(title)}">${ICON.share}Podijeli</button>
+          <button class="sub danger" data-act="delete" aria-label="Obriši: ${esc(title)}">${ICON.trash}Obriši</button>
+        </div>
+      </article>`;
+    }).join('') + creditHTML();
+  }
+  function emptyState(){
+    const where = activeFilter === 'all' ? '' : ' u ovoj kategoriji';
+    return `<div class="empty">
+      <div class="ill">${ICON.other}</div>
+      <h2>Još nema linkova${where}</h2>
+      <p>Dodirni <strong>„Dodaj link”</strong> dolje i zalijepi adresu.</p>
+    </div>`;
+  }
+  function creditHTML(){
+    return `<p class="credit">© 2026 <a href="https://link.hrva.cc">link.hrva.cc</a> · A <a href="https://hrvalabs.net">HrvaLabs.net</a> project</p>`;
+  }
+  function render(){ renderFilters(); renderList(); }
+
+  /* ── helpers ────────────────────────────────────────────────────────── */
+  function esc(s){ return String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function normUrl(raw){
+    let u = (raw || '').trim();
+    if (!u) return '';
+    if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+    return u;
+  }
+  function prettyHost(url){
+    try { const h = new URL(normUrl(url)); return (h.hostname + (h.pathname !== '/' ? h.pathname : '')).replace(/^www\./, ''); }
+    catch(e){ return url; }
+  }
+
+  /* ── actions on a card ──────────────────────────────────────────────── */
+  elList.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const card = e.target.closest('.card');
+    const id = card && card.dataset.id;
+    const item = links.find(l => l.id === id);
+    if (!item) return;
+    const act = btn.dataset.act;
+
+    if (act === 'open'){
+      window.open(normUrl(item.url), '_blank', 'noopener,noreferrer');
+    } else if (act === 'copy'){
+      copyText(normUrl(item.url));
+    } else if (act === 'share'){
+      shareLink(item);
+    } else if (act === 'delete'){
+      deleteLink(id);
+    }
+  });
+
+  async function copyText(text){
+    try { await navigator.clipboard.writeText(text); toast('Link kopiran'); }
+    catch(e){ toast('Kopiranje nije uspjelo'); }
+  }
+  async function shareLink(item){
+    const url = normUrl(item.url);
+    const title = (item.name && item.name.trim()) || prettyHost(url);
+    if (navigator.share){
+      try { await navigator.share({ title, url }); }
+      catch(e){ /* korisnik je odustao */ }
+    } else {
+      try { await navigator.clipboard.writeText(url); toast('Dijeljenje nije dostupno — link kopiran'); }
+      catch(e){ toast('Dijeljenje nije dostupno'); }
+    }
+  }
+  function deleteLink(id){
+    const index = links.findIndex(l => l.id === id);
+    if (index < 0) return;
+    lastDeleted = { item: links[index], index };
+    links.splice(index, 1);
+    save();
+    render();
+    toast('Link obrisan', true);
+  }
+
+  /* ── snackbar with optional undo ────────────────────────────────────── */
+  const snackbar = document.getElementById('snackbar');
+  const snackText = document.getElementById('snackText');
+  const snackAction = document.getElementById('snackAction');
+  let snackTimer = null;
+
+  function toast(msg, undo){
+    snackText.textContent = msg;
+    snackAction.hidden = !undo;
+    snackbar.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(() => { snackbar.classList.remove('show'); lastDeleted = null; }, undo ? 6000 : 2400);
+  }
+  snackAction.addEventListener('click', () => {
+    if (lastDeleted){
+      links.splice(Math.min(lastDeleted.index, links.length), 0, lastDeleted.item);
+      save(); render();
+      lastDeleted = null;
+    }
+    snackbar.classList.remove('show');
+    clearTimeout(snackTimer);
+  });
+
+  /* ── add sheet ──────────────────────────────────────────────────────── */
+  const scrim = document.getElementById('scrim');
+  const sheet = document.getElementById('sheet');
+  const urlInput = document.getElementById('urlInput');
+  const nameInput = document.getElementById('nameInput');
+  const hint = document.getElementById('hint');
+  const catpick = document.getElementById('catpick');
+
+  function renderCatPick(){
+    catpick.innerHTML = CATS.map(c =>
+      `<button data-cat="${c.id}" aria-pressed="${pickedCat===c.id}" style="--c:${c.color}">${c.icon}${c.label}</button>`
+    ).join('');
+  }
+  catpick.addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (!b) return;
+    pickedCat = b.dataset.cat;
+    renderCatPick();
+  });
+
+  const appShell = document.querySelector('.app');
+  let sheetReturnFocus = null;
+
+  function openSheet(){
+    // default category = currently filtered one (nice touch), else Kuhanje
+    pickedCat = (activeFilter !== 'all') ? activeFilter : 'cook';
+    urlInput.value = ''; nameInput.value = ''; hint.textContent = '';
+    renderCatPick();
+    sheetReturnFocus = document.activeElement;
+    appShell.inert = true;          // background non-interactive for keyboard + screen readers
+    sheet.inert = false;
+    scrim.classList.add('open');
+    sheet.classList.add('open');
+    setTimeout(() => urlInput.focus(), 260);
+  }
+  function closeSheet(){
+    scrim.classList.remove('open');
+    sheet.classList.remove('open');
+    appShell.inert = false;
+    sheet.inert = true;
+    if (sheetReturnFocus && typeof sheetReturnFocus.focus === 'function') sheetReturnFocus.focus();
+    sheetReturnFocus = null;
+  }
+
+  // Escape closes the sheet; Tab is trapped inside it while open
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sheet.classList.contains('open')) closeSheet();
+  });
+  sheet.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const f = [...sheet.querySelectorAll('button, input, a[href], [tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  document.getElementById('openAdd').addEventListener('click', openSheet);
+  document.getElementById('cancelBtn').addEventListener('click', closeSheet);
+  scrim.addEventListener('click', closeSheet);
+
+  document.getElementById('pasteBtn').addEventListener('click', async () => {
+    hint.textContent = '';
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && text.trim()){
+        urlInput.value = text.trim();
+        hint.style.color = 'var(--accent)';
+        hint.textContent = 'Zalijepljeno ✓';
+        setTimeout(() => { if (hint.textContent === 'Zalijepljeno ✓'){ hint.textContent=''; hint.style.color='var(--danger)'; } }, 1800);
+      } else {
+        notice('Međuspremnik je prazan.');
+      }
+    } catch(e){
+      notice('Ne mogu pročitati međuspremnik — drži prst na polju pa „Zalijepi”.');
+      urlInput.focus();
+    }
+  });
+  function notice(msg){ hint.style.color = 'var(--danger)'; hint.textContent = msg; }
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const url = normUrl(urlInput.value);
+    if (!url || !/\./.test(url.replace(/^https?:\/\//,''))){
+      notice('Upiši ili zalijepi ispravan link.');
+      urlInput.focus();
+      return;
+    }
+    links.unshift({ id: uid(), name: nameInput.value, url, cat: pickedCat });
+    save();
+    activeFilter = 'all';     // make sure the new link is visible
+    render();
+    closeSheet();
+    toast('Link spremljen');
+  });
+
+  // Enter in a field saves
+  [urlInput, nameInput].forEach(inp => inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); document.getElementById('saveBtn').click(); }
+  }));
+
+  /* ── filter row ─────────────────────────────────────────────────────── */
+  elFilters.addEventListener('click', e => {
+    const b = e.target.closest('[data-filter]');
+    if (!b) return;
+    activeFilter = b.dataset.filter;
+    render();
+    elList.scrollTo({ top: 0 });
+  });
+
+  /* ── go ─────────────────────────────────────────────────────────────── */
+  render();
+  </script>
+</body>
+</html>

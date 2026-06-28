@@ -1,0 +1,118 @@
+---
+import LangSwitch from './LangSwitch.astro';
+import RegisterSW from './RegisterSW.astro';
+import { tt, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const isEn = lang === 'en';
+const homeHref = isEn ? '/en/' : '/';
+---
+
+<header class="topbar">
+  <a class="brand" href={homeHref}>
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg></span>
+    Ladica
+  </a>
+  <div class="topbar-right">
+    <LangSwitch {lang} hrHref="/privacy" enHref="/en/privacy" />
+    <a class="back" href="/app">{tt(lang, 'privacy.topbarBack')}</a>
+  </div>
+</header>
+
+<main class="doc">
+  <h1>{tt(lang, 'privacy.h1')}</h1>
+  <p class="updated">{tt(lang, 'privacy.updatedLabel')} {tt(lang, 'privacy.updated')}</p>
+
+  <div class="tldr" set:html={tt(lang, 'privacy.tldr')}></div>
+
+  <h2>{tt(lang, 'privacy.h.who')}</h2>
+  <p set:html={tt(lang, 'privacy.p.who')}></p>
+
+  <h2>{tt(lang, 'privacy.h.where')}</h2>
+  <p set:html={tt(lang, 'privacy.p.where')}></p>
+
+  <h2>{tt(lang, 'privacy.h.signin')}</h2>
+  <p set:html={tt(lang, 'privacy.p.signin')}></p>
+  <p set:html={tt(lang, 'privacy.p.signinLegal')}></p>
+  <p set:html={tt(lang, 'privacy.p.signinEmail')}></p>
+  <p set:html={tt(lang, 'privacy.p.signinTokens')}></p>
+  <p set:html={tt(lang, 'privacy.p.signinDelete')}></p>
+
+  <h2>{tt(lang, 'privacy.h.cookies')}</h2>
+  <p set:html={tt(lang, 'privacy.p.cookies')}></p>
+
+  <h2>{tt(lang, 'privacy.h.technical')}</h2>
+  <p set:html={tt(lang, 'privacy.p.technical')}></p>
+
+  <h2>{tt(lang, 'privacy.h.backup')}</h2>
+  <p set:html={tt(lang, 'privacy.p.backup')}></p>
+
+  <h2>{tt(lang, 'privacy.h.share')}</h2>
+  <p set:html={tt(lang, 'privacy.p.share')}></p>
+
+  <h2>{tt(lang, 'privacy.h.rights')}</h2>
+  <p set:html={tt(lang, 'privacy.p.rights')}></p>
+
+  <h2>{tt(lang, 'privacy.h.terms')}</h2>
+  <p set:html={tt(lang, 'privacy.p.terms')}></p>
+
+  <h2>{tt(lang, 'privacy.h.liability')}</h2>
+  <p set:html={tt(lang, 'privacy.p.liability')}></p>
+
+  <h2>{tt(lang, 'privacy.h.changes')}</h2>
+  <p set:html={tt(lang, 'privacy.p.changes')}></p>
+
+  <h2>{tt(lang, 'privacy.h.contact')}</h2>
+  <p set:html={tt(lang, 'privacy.p.contact')}></p>
+
+  <p class="note">{tt(lang, 'privacy.note')}</p>
+</main>
+
+<footer class="docfoot" set:html={tt(lang, 'foot.legal')}></footer>
+
+<RegisterSW />
+
+<style is:global>
+  body { background: var(--bg); }
+</style>
+
+<style>
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 14px 20px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: var(--w-heavy); font-size: 18px; letter-spacing: -0.02em; }
+  .brand .mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: #fff; display: grid; place-items: center; }
+  .brand .mark svg { width: 17px; height: 17px; }
+  .back { font-size: 14px; font-weight: var(--w-semibold); color: var(--accent-dk); }
+  .back:hover { text-decoration: underline; }
+
+  .doc { max-width: 720px; margin: 0 auto; padding: 32px 22px 8px; }
+  .doc h1 { font-size: clamp(26px, 4vw, 34px); font-weight: var(--w-heavy); letter-spacing: -0.02em; margin: 0; }
+  .updated { color: var(--muted); font-size: 14px; margin: 6px 0 22px; }
+  .tldr {
+    background: var(--soft); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+    border-radius: var(--radius); padding: 16px 18px; font-size: 15.5px; line-height: 1.6; margin-bottom: 26px;
+  }
+  .doc h2 { font-size: 19px; font-weight: var(--w-heavy); letter-spacing: -0.01em; margin: 26px 0 8px; }
+  .doc p { color: var(--fg); font-size: 16px; line-height: 1.65; margin: 0 0 4px; }
+  .doc a { color: var(--accent-dk); text-decoration: underline; text-underline-offset: 2px; }
+  .doc a:hover { color: var(--accent); }
+  .note { color: var(--muted); font-size: 13.5px; margin-top: 24px; }
+
+  .docfoot {
+    max-width: 720px; margin: 0 auto; padding: 28px 22px 40px;
+    color: var(--muted); font-size: 13px; text-align: center; line-height: 1.6;
+  }
+  .docfoot a { color: var(--accent-dk); }
+  .docfoot a:hover { text-decoration: underline; }
+</style>

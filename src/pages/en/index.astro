@@ -1,0 +1,34 @@
+---
+import Base from '../../layouts/Base.astro';
+import Launcher from '../../components/pages/Launcher.astro';
+import { tt, type Lang } from '../../i18n/ui';
+
+const lang: Lang = 'en';
+const path = '/en/';
+const title = tt(lang, 'index.title');
+const description = tt(lang, 'index.description');
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Ladica',
+    url: 'https://ladica.hrva.cc' + path,
+    inLanguage: lang,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Ladica',
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    description,
+    url: 'https://ladica.hrva.cc/app',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  },
+];
+---
+
+<Base {title} {description} {path} {lang} localized jsonLd={jsonLd}>
+  <Launcher {lang} />
+</Base>

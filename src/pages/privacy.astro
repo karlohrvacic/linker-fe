@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import PrivacyDoc from '../components/pages/PrivacyDoc.astro';
+import { tt, type Lang } from '../i18n/ui';
+
+const lang: Lang = 'hr';
+const path = '/privacy';
+const title = tt(lang, 'privacy.title');
+const description = tt(lang, 'privacy.description');
+---
+
+<Base {title} {description} {path} {lang} localized>
+  <PrivacyDoc {lang} />
+</Base>

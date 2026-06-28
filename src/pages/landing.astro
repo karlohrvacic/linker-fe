@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import Landing from '../components/pages/Landing.astro';
+import { tt, type Lang } from '../i18n/ui';
+
+const lang: Lang = 'hr';
+const path = '/landing';
+const title = tt(lang, 'landing.title');
+const description = tt(lang, 'landing.description');
+
+const faqItems = [1, 2, 3, 4, 5].map((n) => ({
+  q: tt(lang, `landing.faq.${n}.q`),
+  a: tt(lang, `landing.faq.${n}.a`),
+}));
+
+const stepItems = [1, 2, 3].map((n) => ({
+  h: tt(lang, `landing.step.${n}.h`),
+  p: tt(lang, `landing.step.${n}.p`),
+}));
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Ladica',
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    description,
+    url: 'https://ladica.hrva.cc/app',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang,
+    mainEntity: faqItems.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: tt(lang, 'landing.how.title'),
+    inLanguage: lang,
+    step: stepItems.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.h,
+      text: s.p,
+    })),
+  },
+];
+---
+
+<Base {title} {description} {path} {lang} localized jsonLd={jsonLd}>
+  <Landing {lang} />
+</Base>

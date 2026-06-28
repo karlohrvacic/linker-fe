@@ -1,0 +1,16 @@
+---
+/**
+ * Registers the service worker on the static marketing/legal pages only.
+ *
+ * astro.config sets injectRegister:false, and /app registers the SW itself in
+ * LinkApp. Without this, a first-time visitor to / · /landing · /privacy has no
+ * active SW, so Chrome's installability criteria are never met and the Install
+ * button stays hidden. Drop this ONCE per marketing page (never on /app, to
+ * avoid double registration).
+ */
+---
+
+<script>
+  import { registerSW } from 'virtual:pwa-register';
+  registerSW({ immediate: true });
+</script>

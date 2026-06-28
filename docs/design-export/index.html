@@ -1,0 +1,191 @@
+<!doctype html>
+<!-- Home / launcher for the "Ladica" project (link.hrva.cc). Lightweight, branded entry point. A HrvaLabs.net project. -->
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#15803d" />
+  <title>Ladica · spremi linkove, otvori jednim dodirom</title>
+  <meta name="description" content="Ladica — spremi linkove (recepti, kupovina, putovanja) i otvori ih jednim dodirom. Spremljeno na uređaju, radi bez interneta." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icon-180.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ladica — spremi linkove, otvori jednim dodirom" />
+  <meta property="og:description" content="Jednostavan spremnik linkova: recepti, kupovina, putovanja. Spremljeno na uređaju, radi bez interneta." />
+  <meta property="og:url" content="https://link.hrva.cc/" />
+  <meta property="og:image" content="https://link.hrva.cc/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://link.hrva.cc/assets/og.png" />
+  <style>
+    :root {
+      --bg:#eef2ef; --surface:#ffffff; --fg:#1c2320; --muted:#687570; --border:#e2e8e3;
+      --accent:#15803d; --accent-dk:#116e34; --soft:#e8f3ec;
+      --cat-cook:#d9690f; --cat-shop:#2563eb; --cat-travel:#0e8f96;
+      --font: -apple-system, "Roboto", "Segoe UI", system-ui, sans-serif;
+      --shadow: 0 1px 2px rgba(20,40,30,.05), 0 10px 30px rgba(20,45,30,.08);
+    }
+    * , *::before, *::after { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100dvh; background:var(--bg); color:var(--fg);
+      font-family:var(--font); font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased;
+      display:flex; align-items:center; justify-content:center; padding:32px 20px;
+      position:relative; overflow-x:hidden;
+    }
+    /* one restrained green glow behind the brand — not a full wash */
+    body::before {
+      content:""; position:fixed; top:-180px; left:50%; transform:translateX(-50%);
+      width:560px; height:420px; pointer-events:none;
+      background:radial-gradient(closest-side, rgba(21,128,61,.16), transparent 70%);
+      filter:blur(6px);
+    }
+    svg { display:block; }
+    a { text-decoration:none; color:inherit; }
+
+    .wrap { width:100%; max-width:480px; position:relative; }
+
+    /* brand lockup */
+    .brandrow { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:18px; }
+    .brandrow .by { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--accent-dk); background:var(--soft); padding:6px 12px; border-radius:999px; }
+    .head { text-align:center; margin-bottom:28px; }
+    .mark { width:66px; height:66px; border-radius:20px; background:var(--accent);
+      display:grid; place-items:center; color:#fff; margin:0 auto 16px;
+      box-shadow:0 12px 26px rgba(21,128,61,.30); }
+    .mark svg { width:38px; height:38px; }
+    .head h1 { margin:0; font-size:34px; font-weight:840; letter-spacing:-0.025em; }
+    .head p { margin:8px 0 0; color:var(--muted); font-size:17px; }
+
+    /* primary tile — the app, with a peek of the real product */
+    .app-tile {
+      display:block; background:var(--surface); border:1px solid var(--border); border-radius:26px;
+      box-shadow:var(--shadow); padding:20px; margin-bottom:14px;
+      transition:transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .app-tile:hover { transform:translateY(-3px); box-shadow:0 14px 36px rgba(20,45,30,.13); border-color:color-mix(in srgb,var(--accent) 38%,var(--border)); }
+    .app-tile:active { transform:translateY(-1px); }
+    .app-tile:focus-visible { outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent); outline-offset:3px; }
+    .tile-label { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .tile-label b { font-size:14px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; color:var(--muted); }
+    .tile-label .saved { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); }
+    .tile-label .saved svg { width:14px; height:14px; color:var(--accent); }
+
+    /* mini product preview */
+    .preview { background:color-mix(in srgb, var(--bg) 60%, var(--surface)); border:1px solid var(--border); border-radius:18px; padding:12px; }
+    .pchips { display:flex; gap:6px; margin-bottom:10px; }
+    .pchip { font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:999px; border:1.4px solid var(--border); background:var(--surface);
+      display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    .pchip.on { border-color:var(--accent); background:var(--soft); color:var(--accent-dk); }
+    .pchip .d { width:7px; height:7px; border-radius:999px; }
+    .pcard { background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:11px 12px; }
+    .pcat { font-size:11px; font-weight:800; display:inline-flex; align-items:center; gap:5px; color:var(--cat-cook); }
+    .pcat svg { width:13px; height:13px; }
+    .pcard .pn { font-weight:750; font-size:14px; margin-top:4px; }
+    .pcard .pu { color:var(--muted); font-size:12px; margin-top:1px; }
+    .popen { margin-top:9px; background:var(--accent); color:#fff; border-radius:10px; text-align:center;
+      font-weight:750; font-size:13px; padding:8px; display:flex; align-items:center; justify-content:center; gap:6px; }
+    .popen svg { width:13px; height:13px; }
+
+    .tile-cta { margin-top:14px; min-height:54px; background:var(--accent); color:#fff; border-radius:15px;
+      display:flex; align-items:center; justify-content:center; gap:9px; font-size:18px; font-weight:780; letter-spacing:-0.01em; }
+    .tile-cta svg { width:20px; height:20px; }
+    .app-tile:hover .tile-cta { background:var(--accent-dk); }
+
+    /* secondary row — the intro page */
+    .row-tile {
+      display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border);
+      border-radius:18px; padding:16px 18px; box-shadow:0 1px 2px rgba(20,40,30,.04);
+      transition:transform .12s ease, border-color .15s ease; }
+    .row-tile:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--accent) 30%,var(--border)); }
+    .row-tile:focus-visible { outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent); outline-offset:3px; }
+    .row-tile .ri { width:42px; height:42px; flex:none; border-radius:12px; display:grid; place-items:center;
+      background:color-mix(in srgb,var(--cat-shop) 12%, var(--surface)); color:var(--cat-shop); }
+    .row-tile .ri svg { width:21px; height:21px; }
+    .row-tile .rx { flex:1; min-width:0; }
+    .row-tile .rx b { display:block; font-size:16.5px; font-weight:730; letter-spacing:-0.01em; }
+    .row-tile .rx span { color:var(--muted); font-size:14px; }
+    .row-tile .arw { color:var(--muted); flex:none; }
+    .row-tile .arw svg { width:20px; height:20px; }
+
+    .qr-card { display:flex; align-items:center; gap:15px; margin-top:18px; padding:14px 16px;
+      background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:0 1px 2px rgba(20,40,30,.04); }
+    .qr-card img { width:82px; height:82px; flex:none; border-radius:10px; border:1px solid var(--border); background:#fff; padding:5px; }
+    .qr-card .qx b { display:block; font-size:15.5px; font-weight:740; letter-spacing:-0.01em; }
+    .qr-card .qx span { color:var(--muted); font-size:13.5px; }
+    .qr-card .qx .u { color:var(--accent-dk); font-weight:700; }
+    .foot { text-align:center; color:var(--muted); font-size:13px; margin-top:26px; line-height:1.65; }
+    .foot a { color:var(--accent-dk); }
+    .foot a:hover { text-decoration:underline; }
+    .foot .legal { display:inline-block; margin-top:4px; }
+
+    /* one decisive flourish: a calm "drawer opens" entrance, reduced-motion safe */
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal { opacity:0; transform:translateY(14px); animation:rise .62s cubic-bezier(.22,.61,.36,1) forwards; }
+      .mark { animation:settle .7s cubic-bezier(.22,.61,.36,1) both; }
+      .d1{animation-delay:.04s} .d2{animation-delay:.12s} .d3{animation-delay:.22s} .d4{animation-delay:.32s} .d5{animation-delay:.42s}
+    }
+    @keyframes rise { to { opacity:1; transform:none; } }
+    @keyframes settle { from { opacity:0; transform:translateY(8px) scale(.9); } to { opacity:1; transform:none; } }
+
+    @media (max-width:380px){ .head h1{font-size:30px} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="brandrow reveal d1"><span class="by">HrvaLabs</span></div>
+
+    <div class="head">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg>
+      </div>
+      <h1 class="reveal d2">Ladica</h1>
+      <p class="reveal d3">Spremi linkove. Otvori jednim dodirom.</p>
+    </div>
+
+    <a class="app-tile reveal d4" href="app.html" aria-label="Otvori Ladicu — aplikaciju za spremanje linkova">
+      <div class="tile-label">
+        <b>Aplikacija</b>
+        <span class="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l5 5 9-11"/></svg>Spremljeno na uređaju</span>
+      </div>
+
+      <div class="preview" aria-hidden="true">
+        <div class="pchips">
+          <span class="pchip on">Sve</span>
+          <span class="pchip"><span class="d" style="background:var(--cat-cook)"></span>Kuhanje</span>
+          <span class="pchip"><span class="d" style="background:var(--cat-shop)"></span>Kupovina</span>
+        </div>
+        <div class="pcard">
+          <span class="pcat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14l-1 9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 11V7a3 3 0 0 1 6 0"/></svg>Kuhanje</span>
+          <div class="pn">Recept za sarmu</div>
+          <div class="pu">coolinarika.com/recepti</div>
+          <div class="popen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Otvori</div>
+        </div>
+      </div>
+
+      <div class="tile-cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        Otvori Ladicu
+      </div>
+    </a>
+
+    <a class="row-tile reveal d5" href="landing.html">
+      <span class="ri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg></span>
+      <span class="rx"><b>Kako radi</b><span>Kratak pregled u tri koraka.</span></span>
+      <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <div class="qr-card reveal d5">
+      <img src="assets/qr-linkhrva.svg" alt="QR kod za link.hrva.cc" width="82" height="82" />
+      <div class="qx">
+        <b>Otvori na mobitelu</b>
+        <span>Skeniraj kod kamerom telefona — <span class="u">link.hrva.cc</span></span>
+      </div>
+    </div>
+
+    <p class="foot reveal d5">Linkovi se spremaju na uređaju · radi bez interneta<br>
+      <span class="legal">© 2026 <a href="https://link.hrva.cc">link.hrva.cc</a> · A <a href="https://hrvalabs.net">HrvaLabs.net</a> project · All rights reserved</span></p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import AuthCallback from '../../components/app/AuthCallback.svelte';
+
+const description = 'Dovršavamo tvoju prijavu u Ladicu…';
+---
+
+<Base title="Prijava · Ladica" description={description} path="/auth/callback" noindex>
+  <main class="callback">
+    <div id="auth-boot" class="boot" aria-hidden="true">
+      <span class="spinner"></span>
+      <p>Prijava…</p>
+    </div>
+    <AuthCallback client:only="svelte" />
+  </main>
+</Base>
+
+<style is:global>
+  body { background: var(--bg); }
+</style>
+
+<style>
+  .callback { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+  .boot {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    color: var(--muted);
+  }
+  .boot p { margin: 0; font-size: 16px; font-weight: 600; }
+  .spinner {
+    width: 38px; height: 38px; border-radius: 999px;
+    border: 4px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+</style>

@@ -1,0 +1,296 @@
+<!doctype html>
+<!-- Landing / intro companion for "Ladica" (link.hrva.cc). Croatian, responsive marketing surface. -->
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#15803d" />
+  <title>Ladica · spremi i otvori jednim dodirom</title>
+  <meta name="description" content="Ladica čuva tvoje linkove — recepti, trgovine, putovanja — posloženo po kategorijama. Spremljeno na uređaju, radi bez interneta." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icon-180.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ladica — tvoja ladica za linkove" />
+  <meta property="og:description" content="Spremi linkove i otvori ih jednim dodirom. Posloženo po kategorijama, radi bez interneta." />
+  <meta property="og:url" content="https://link.hrva.cc/landing.html" />
+  <meta property="og:image" content="https://link.hrva.cc/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://link.hrva.cc/assets/og.png" />
+  <style>
+    :root {
+      --bg:        #f6f8f6;
+      --surface:   #ffffff;
+      --fg:        #1c2320;
+      --muted:     #687570;
+      --border:    #e2e8e3;
+      --accent:    #15803d;
+      --accent-dk: #116e34;
+      --soft:      #e8f3ec;
+
+      --cat-cook:   #d9690f;
+      --cat-shop:   #2563eb;
+      --cat-travel: #0e8f96;
+      --cat-other:  #5b6b78;
+
+      --font: -apple-system, "Roboto", "Segoe UI", system-ui, sans-serif;
+      --container: 1080px;
+      --radius: 16px;
+      --radius-lg: 24px;
+    }
+    * , *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+    svg { display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    p { text-wrap: pretty; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+    .container { max-width: var(--container); margin-inline: auto; padding-inline: 22px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      min-height: 54px; padding: 0 24px; border-radius: 14px;
+      font-size: 17px; font-weight: 700; border: 1.5px solid transparent;
+      transition: transform .05s, background .15s, border-color .15s;
+    }
+    .btn svg { width: 19px; height: 19px; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dk); }
+    .btn-ghost { background: var(--surface); color: var(--fg); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent-dk); }
+
+    /* nav */
+    .nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; min-height: 66px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; letter-spacing: -0.02em; }
+    .brand .mark { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; color: #fff; }
+    .brand .mark svg { width: 19px; height: 19px; }
+    .nav .btn { min-height: 44px; font-size: 15px; padding: 0 16px; }
+
+    /* hero */
+    .hero { padding: clamp(40px, 7vw, 84px) 0 clamp(48px, 7vw, 90px); }
+    .hero .container { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+    .brandpill { display:inline-block; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-dk); background:var(--soft); padding:6px 12px; border-radius:999px; margin-bottom:14px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--accent-dk); background: var(--soft); padding: 7px 14px; border-radius: 999px; margin-bottom: 20px; }
+    .hero h1 { font-size: clamp(34px, 5.4vw, 56px); line-height: 1.05; font-weight: 820; }
+    .hero p.lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); margin: 18px 0 28px; max-width: 30ch; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .note { margin-top: 16px; font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .note svg { width: 16px; height: 16px; color: var(--accent); }
+
+    @media (max-width: 860px) {
+      .hero .container { grid-template-columns: 1fr; text-align: center; }
+      .hero p.lead { margin-inline: auto; }
+      .hero-cta, .note { justify-content: center; }
+      .phone-wrap { order: -1; }
+    }
+
+    /* phone mockup */
+    .phone-wrap { display: flex; justify-content: center; }
+    .phone {
+      width: 290px; max-width: 84vw;
+      background: #11201a; border-radius: 40px; padding: 11px;
+      box-shadow: 0 30px 60px rgba(15,40,25,.22), 0 6px 16px rgba(15,40,25,.12);
+    }
+    .phone .screen { background: var(--surface); border-radius: 30px; overflow: hidden; }
+    .pscreen-top { padding: 18px 16px 12px; }
+    .pscreen-top .ptitle { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+    .pscreen-top .ptitle .pm { width: 24px; height: 24px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; color: #fff; }
+    .pscreen-top .ptitle .pm svg { width: 14px; height: 14px; }
+    .pscreen-top .psub { color: var(--muted); font-size: 12.5px; margin: 3px 0 0 32px; }
+    .pchips { display: flex; gap: 6px; padding: 4px 16px 12px; overflow: hidden; }
+    .pchip { font-size: 11.5px; font-weight: 700; padding: 6px 10px; border-radius: 999px; border: 1.4px solid var(--border); display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .pchip .d { width: 7px; height: 7px; border-radius: 999px; }
+    .pchip.on { border-color: var(--accent); background: var(--soft); color: var(--accent-dk); }
+    .pcards { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .pcard { border: 1px solid var(--border); border-radius: 16px; padding: 12px; box-shadow: 0 4px 12px rgba(20,40,30,.05); }
+    .pcat { font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
+    .pcat svg { width: 13px; height: 13px; }
+    .pcard .pn { font-weight: 750; font-size: 14.5px; margin-top: 5px; }
+    .pcard .pu { color: var(--muted); font-size: 12px; margin-top: 1px; }
+    .popen { margin-top: 9px; background: var(--accent); color: #fff; border-radius: 10px; text-align: center; font-weight: 750; font-size: 13.5px; padding: 9px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .popen svg { width: 14px; height: 14px; }
+    .padd { margin: 4px 16px 16px; background: var(--accent); color: #fff; border-radius: 13px; text-align: center; font-weight: 800; font-size: 14px; padding: 13px; }
+
+    /* sections */
+    section.block { padding: clamp(44px, 7vw, 80px) 0; border-top: 1px solid var(--border); }
+    .heading { max-width: 30ch; margin-bottom: 36px; }
+    .heading h2 { font-size: clamp(26px, 3.6vw, 38px); font-weight: 800; }
+    .heading p { color: var(--muted); margin: 12px 0 0; font-size: 18px; }
+
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    @media (max-width: 820px) { .grid3 { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 26px;
+    }
+    .card .ico { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; color: #fff; margin-bottom: 16px; }
+    .card .ico svg { width: 23px; height: 23px; }
+    .card h3 { font-size: 20px; font-weight: 750; }
+    .card p { color: var(--muted); margin: 8px 0 0; font-size: 16px; }
+
+    /* steps */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; }
+    @media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+    .step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; position: relative; }
+    .step .n { counter-increment: s; width: 38px; height: 38px; border-radius: 12px; background: var(--soft); color: var(--accent-dk); display: grid; place-items: center; font-weight: 850; font-size: 18px; margin-bottom: 14px; }
+    .step .n::before { content: counter(s); }
+    .step h3 { font-size: 18px; font-weight: 750; }
+    .step p { color: var(--muted); margin: 7px 0 0; font-size: 15.5px; }
+
+    /* cta strip */
+    .cta { background: linear-gradient(160deg, #166b34, #15803d); color: #fff; border-radius: var(--radius-lg); padding: clamp(34px, 5vw, 56px); text-align: center; }
+    .cta h2 { font-size: clamp(26px, 3.6vw, 40px); font-weight: 820; }
+    .cta p { color: #d6efe0; margin: 14px auto 26px; max-width: 40ch; font-size: 18px; }
+    .cta .btn-primary { background: #fff; color: var(--accent-dk); }
+    .cta .btn-primary:hover { background: #eafaf0; }
+
+    footer { padding: 40px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+    footer .container { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    footer a { color: var(--accent-dk); }
+    footer a:hover { text-decoration: underline; }
+    footer .legal { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header class="nav" data-od-id="nav">
+    <div class="container">
+      <a class="brand" href="#top">
+        <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg></span>
+        Ladica
+      </a>
+      <a class="btn btn-primary" href="app.html">Otvori aplikaciju</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" data-od-id="hero">
+      <div class="container">
+        <div>
+          <div><span class="brandpill">HrvaLabs</span></div>
+          <span class="eyebrow">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Dovoljno jednostavno za svakoga
+          </span>
+          <h1>Spremi linkove.<br>Otvori jednim dodirom.</h1>
+          <p class="lead">Ladica čuva tvoje linkove — recepti, trgovine, putovanja — posloženo po kategorijama. Bez prijave, bez gužve.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="app.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+              Otvori aplikaciju
+            </a>
+            <a class="btn btn-ghost" href="#kako">Kako radi</a>
+          </div>
+          <p class="note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Linkovi se spremaju na telefon — ništa se ne šalje na internet.
+          </p>
+        </div>
+
+        <div class="phone-wrap" aria-hidden="true">
+          <div class="phone">
+            <div class="screen">
+              <div class="pscreen-top">
+                <div class="ptitle"><span class="pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg></span>Ladica</div>
+                <div class="psub">Spremi link i otvori ga jednim dodirom.</div>
+              </div>
+              <div class="pchips">
+                <span class="pchip on">Sve</span>
+                <span class="pchip"><span class="d" style="background:var(--cat-cook)"></span>Kuhanje</span>
+                <span class="pchip"><span class="d" style="background:var(--cat-shop)"></span>Kupovina</span>
+              </div>
+              <div class="pcards">
+                <div class="pcard">
+                  <span class="pcat" style="color:var(--cat-cook)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14l-1 9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 11V7a3 3 0 0 1 6 0"/></svg>Kuhanje</span>
+                  <div class="pn">Recept za sarmu</div>
+                  <div class="pu">coolinarika.com/recepti</div>
+                  <div class="popen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Otvori</div>
+                </div>
+                <div class="pcard">
+                  <span class="pcat" style="color:var(--cat-shop)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2l2.2 11.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.78L21 8H6"/></svg>Kupovina</span>
+                  <div class="pn">Konzum web trgovina</div>
+                  <div class="pu">konzum.hr</div>
+                  <div class="popen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Otvori</div>
+                </div>
+              </div>
+              <div class="padd">＋ Dodaj link</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" data-od-id="features">
+      <div class="container">
+        <div class="heading">
+          <h2>Napravljeno da bude jednostavno</h2>
+          <p>Velika dugmad, jasni nazivi, ništa suvišno na ekranu.</p>
+        </div>
+        <div class="grid3">
+          <div class="card">
+            <div class="ico" style="background:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></div>
+            <h3>Otvori jednim dodirom</h3>
+            <p>Veliko zeleno dugme „Otvori” na svakom linku. Bez traženja i bez tipkanja adrese.</p>
+          </div>
+          <div class="card">
+            <div class="ico" style="background:var(--cat-cook)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14l-1 9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 11V7a3 3 0 0 1 6 0"/></svg></div>
+            <h3>Posloženo po kategorijama</h3>
+            <p>Kuhanje, Kupovina, Putovanja i Ostalo — svaka u svojoj boji, lako se snaći.</p>
+          </div>
+          <div class="card">
+            <div class="ico" style="background:var(--cat-shop)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1.2"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg></div>
+            <h3>Zalijepi i gotovo</h3>
+            <p>Kopiraš link bilo gdje, dodirneš „Zalijepi iz međuspremnika” i spremiš. To je sve.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="kako" data-od-id="steps">
+      <div class="container">
+        <div class="heading">
+          <h2>Kako radi</h2>
+          <p>Tri koraka — i link je spremljen zauvijek.</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="n"></div>
+            <h3>Kopiraj link</h3>
+            <p>U pregledniku ili poruci drži prst na linku i odaberi „Kopiraj”.</p>
+          </div>
+          <div class="step">
+            <div class="n"></div>
+            <h3>Zalijepi i odaberi</h3>
+            <p>Otvori aplikaciju, dodirni „Dodaj link”, zalijepi i odaberi kategoriju.</p>
+          </div>
+          <div class="step">
+            <div class="n"></div>
+            <h3>Otvori kad treba</h3>
+            <p>Link te čeka u svojoj kategoriji. Jedan dodir i otvara se.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" data-od-id="cta">
+      <div class="container">
+        <div class="cta">
+          <h2>Spremni za prvi link?</h2>
+          <p>Aplikacija je već puna primjera koje možeš obrisati i zamijeniti svojima.</p>
+          <a class="btn btn-primary" href="app.html">Otvori aplikaciju</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer data-od-id="footer">
+    <div class="container">
+      <span>Ladica — tvoja ladica za linkove. Radi bez interneta, ništa se ne prati.</span>
+      <span class="legal">© 2026 <a href="https://link.hrva.cc">link.hrva.cc</a> · A <a href="https://hrvalabs.net">HrvaLabs.net</a> project · All rights reserved</span>
+    </div>
+  </footer>
+</body>
+</html>

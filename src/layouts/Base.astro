@@ -1,0 +1,156 @@
+---
+import '../styles/tokens.css';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Pathname for canonical + OG url of THIS page, e.g. '/', '/en/landing', '/app'. */
+  path?: string;
+  /** Document language. Croatian is the default; English pages pass 'en'. */
+  lang?: Lang;
+  /**
+   * Marketing/legal pages exist in both locales — set this so Base emits hr+en
+   * hreflang alternates (and x-default → hr). Shared pages (/app, /auth/*) leave
+   * it off and only advertise themselves.
+   */
+  localized?: boolean;
+  ogImage?: string;
+  jsonLd?: object | object[];
+  /** Transient/contentless routes (/app shell, /auth/callback) → keep them out of the index. */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  path = '/',
+  lang = 'hr',
+  localized = false,
+  ogImage = '/assets/og.png',
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+const site = (Astro.site?.toString() ?? 'https://ladica.hrva.cc/').replace(/\/$/, '');
+// Astro builds directory-style URLs (/landing/) and the sitemap emits trailing
+// slashes — normalise every URL we emit (canonical, hreflang, og:url) to match so
+// the canonical never disagrees with the sitemap.
+const withSlash = (p: string) => (p.endsWith('/') ? p : p + '/');
+const canonical = site + withSlash(path);
+const ogImageAbs = ogImage.startsWith('http') ? ogImage : site + ogImage;
+
+// Derive the hr/en paths for this page so we can emit hreflang alternates.
+// hr lives unprefixed (/, /landing, /privacy); en lives under /en.
+const hrPath = withSlash(lang === 'en' ? (path === '/en/' ? '/' : path.replace(/^\/en/, '')) : path);
+const enPath = withSlash(path === '/' ? '/en/' : `/en${hrPath}`);
+const ogLocale = lang === 'en' ? 'en_US' : 'hr_HR';
+const ORG = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'HrvaLabs',
+  url: 'https://hrvalabs.net',
+  logo: `${site}/assets/icon-512.png`,
+  // sameAs: profile URLs anchor the entity for AI/search engines. Add HrvaLabs'
+  // public profiles here when available (e.g. GitHub / X / LinkedIn).
+};
+const pageJsonLd = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const jsonLdItems = [ORG, ...pageJsonLd];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#15803d" />
+
+    <!-- Apply saved theme + text size before first paint (no flash). Mirrors lib/appearance.ts. -->
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('ladica-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+        var f = localStorage.getItem('ladica-font-scale');
+        var k = { normal: 1, large: 1.125, larger: 1.25 };
+        if (f && k[f]) document.documentElement.style.fontSize = 16 * k[f] + 'px';
+      } catch (e) {}
+    </script>
+
+    <!-- Capture beforeinstallprompt as early as possible (it can fire before any
+         component hydrates). InstallButton reads window.__ladicaBip as a fallback. -->
+    <script is:inline>
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.__ladicaBip = e;
+      });
+    </script>
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="HrvaLabs.net" />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    <link rel="canonical" href={canonical} />
+    {localized ? (
+      <>
+        <link rel="alternate" hreflang="hr" href={site + hrPath} />
+        <link rel="alternate" hreflang="en" href={site + enPath} />
+        <link rel="alternate" hreflang="x-default" href={site + hrPath} />
+      </>
+    ) : (
+      <>
+        <link rel="alternate" hreflang="hr" href={canonical} />
+        <link rel="alternate" hreflang="x-default" href={canonical} />
+      </>
+    )}
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/icon-180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Ladica" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ladica" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta property="og:locale" content={ogLocale} />
+    {localized && <meta property="og:locale:alternate" content={lang === 'en' ? 'hr_HR' : 'en_US'} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
+    <meta name="twitter:image:alt" content={title} />
+
+    {jsonLdItems.map((obj) => (
+      <script type="application/ld+json" set:html={JSON.stringify(obj)} />
+    ))}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  svg { display: block; }
+  a { color: inherit; text-decoration: none; }
+</style>

@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import LinkApp from '../components/app/LinkApp.svelte';
+
+const description =
+  'Ladica — spremi linkove i otvori ih jednim dodirom. Spremljeno na uređaju.';
+---
+
+<Base title="Ladica · spremi i otvori jednim dodirom" description={description} path="/app" noindex>
+  <div id="ladica-boot" class="boot" aria-hidden="true">
+    <span class="boot-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg>
+    </span>
+  </div>
+  <LinkApp client:only="svelte" />
+</Base>
+
+<style is:global>
+  body { background: var(--bg); overscroll-behavior-y: none; }
+</style>
+
+<style>
+  .boot { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); }
+  .boot-mark {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--accent); color: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 12px 26px rgba(21,128,61,.3);
+  }
+  .boot-mark svg { width: 30px; height: 30px; }
+</style>

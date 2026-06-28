@@ -1,0 +1,97 @@
+/* Ladica design tokens — single source of truth.
+   Values copied verbatim from the original Open Design export
+   (app.html / index.html / landing.html). Do not drift from these. */
+:root {
+  --bg:        #eef2ef;
+  --app-bg:    #f6f8f6;
+  --surface:   #ffffff;
+  --fg:        #1c2320;
+  --muted:     #5d6a64;   /* darkened to clear 4.5:1 on --app-bg */
+  --border:    #e2e8e3;
+  --accent:    #15803d;   /* primary action — Otvori, Spremi, Dodaj */
+  --accent-dk: #116e34;
+  --danger:    #c0413a;
+  --soft:      #e8f3ec;
+
+  /* category accents */
+  --cat-cook:   #d9690f;
+  --cat-shop:   #2563eb;
+  --cat-travel: #0e8f96;
+  --cat-posao:  #7c3aed;
+  --cat-ucenje: #db2777;
+  --cat-other:  #5b6b78;
+
+  --font: -apple-system, "Roboto", "Segoe UI", system-ui, sans-serif;
+
+  /* Weight scale — maps cleanly onto the static system-font faces so the
+     hierarchy renders the same on the Roboto/Segoe fallback as on SF. */
+  --w-medium:   500;
+  --w-semibold: 600;
+  --w-bold:     700;
+  --w-heavy:    800;
+
+  --radius:    14px;
+  --radius-lg: 22px;
+
+  /* Radius scale for the rest of the UI (sheets, menus, segmented controls). */
+  --r-sm:    10px;
+  --r-md:    14px;
+  --r-lg:    22px;
+  --r-sheet: 24px;
+
+  --shadow:    0 1px 2px rgba(20,40,30,.05), 0 6px 18px rgba(20,40,30,.06);
+  --shadow-up: 0 -2px 18px rgba(20,40,30,.07);
+  /* Elevation shadows share the card's tint base (rgba(20,40,30)); only
+     blur/offset/alpha vary per level. */
+  --shadow-md:    0 10px 32px rgba(20,40,30,.18);  /* account menu */
+  --shadow-lg:    0 20px 60px rgba(20,40,30,.28);  /* centered dialog */
+  --shadow-sheet: 0 -10px 40px rgba(20,40,30,.18); /* bottom sheets */
+
+  --tap:    52px;         /* comfortable Android touch target */
+  --tap-sm: 48px;         /* secondary controls (catpick, segmented, backup) */
+
+  --container: 1080px;
+}
+
+/* ── Dark theme ─────────────────────────────────────────────────────────────
+   Only the COLOR tokens change; weights/radii/shadows/sizes are theme-agnostic.
+   No data-theme attribute → follow the OS. data-theme="dark"|"light" forces it
+   (a Light choice must win even on a dark OS, hence the :not([data-theme=light])). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0d1310;
+    --app-bg:    #121a15;
+    --surface:   #18211b;
+    --fg:        #e8efe9;
+    --muted:     #9aa69f;
+    --border:    #28332c;
+    --accent:    #15803d;
+    --accent-dk: #6ee29c;   /* accent used as TEXT — lightened for dark */
+    --danger:    #e06b63;
+    --soft:      #1b3325;
+    --cat-cook:   #ef8a3c;
+    --cat-shop:   #6aa6ff;
+    --cat-travel: #2bb6bd;
+    --cat-posao:  #b39bff;
+    --cat-ucenje: #f072ae;
+    --cat-other:  #9aa7b0;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #0d1310;
+  --app-bg:    #121a15;
+  --surface:   #18211b;
+  --fg:        #e8efe9;
+  --muted:     #9aa69f;
+  --border:    #28332c;
+  --accent:    #15803d;
+  --accent-dk: #6ee29c;
+  --danger:    #e06b63;
+  --soft:      #1b3325;
+  --cat-cook:   #ef8a3c;
+  --cat-shop:   #6aa6ff;
+  --cat-travel: #2bb6bd;
+  --cat-posao:  #b39bff;
+  --cat-ucenje: #f072ae;
+  --cat-other:  #9aa7b0;
+}

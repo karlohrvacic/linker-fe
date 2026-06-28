@@ -1,0 +1,179 @@
+---
+import InstallButton from '../app/InstallButton.svelte';
+import LangSwitch from './LangSwitch.astro';
+import RegisterSW from './RegisterSW.astro';
+import { tt, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const isEn = lang === 'en';
+const landingHref = isEn ? '/en/landing' : '/landing';
+const privacyHref = isEn ? '/en/privacy' : '/privacy';
+---
+
+<script is:inline>
+  // Returning visitors (already opened the app or read "how it works") skip the intro —
+  // unless they came here on purpose via the "Home" link (?home), which must show the launcher.
+  try { if (localStorage.getItem('ladica-seen') && !new URLSearchParams(location.search).has('home')) location.replace('/app'); } catch (e) {}
+</script>
+
+<main class="wrap">
+  <div class="langtop"><LangSwitch {lang} hrHref="/" enHref="/en/" /></div>
+
+  <div class="brandrow reveal d1"><span class="by">{tt(lang, 'brand.by')}</span></div>
+
+  <div class="head">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5l5-5"/><path d="M7.5 10.5l-2 2a3.5 3.5 0 0 0 5 5l2-2"/><path d="M16.5 13.5l2-2a3.5 3.5 0 0 0-5-5l-2 2"/></svg>
+    </div>
+    <h1 class="reveal d2">Ladica</h1>
+    <p class="reveal d3">{tt(lang, 'index.tagline')}</p>
+  </div>
+
+  <a class="app-tile reveal d4" href="/app" aria-label={tt(lang, 'index.appTileAria')}>
+    <div class="tile-label">
+      <b>{tt(lang, 'index.appLabel')}</b>
+      <span class="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l5 5 9-11"/></svg>{tt(lang, 'index.savedOnDevice')}</span>
+    </div>
+
+    <div class="preview" aria-hidden="true">
+      <div class="pchips">
+        <span class="pchip on">{tt(lang, 'demo.all')}</span>
+        <span class="pchip"><span class="d" style="background:var(--cat-cook)"></span>{tt(lang, 'demo.cook')}</span>
+        <span class="pchip"><span class="d" style="background:var(--cat-shop)"></span>{tt(lang, 'demo.shop')}</span>
+      </div>
+      <div class="pcard">
+        <span class="pcat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14l-1 9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 11V7a3 3 0 0 1 6 0"/></svg>{tt(lang, 'demo.cook')}</span>
+        <div class="pn">{tt(lang, 'demo.cardCook')}</div>
+        <div class="pu">{tt(lang, 'demo.cardCookUrl')}</div>
+        <div class="popen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>{tt(lang, 'demo.open')}</div>
+      </div>
+    </div>
+
+    <div class="tile-cta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      {tt(lang, 'index.tileCta')}
+    </div>
+  </a>
+
+  <div class="install-row reveal d5"><InstallButton client:visible variant="launcher" /></div>
+
+  <a class="row-tile reveal d5" href={landingHref}>
+    <span class="ri" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg></span>
+    <span class="rx"><b>{tt(lang, 'index.howTitle')}</b><span>{tt(lang, 'index.howSub')}</span></span>
+    <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+  </a>
+
+  <div class="qr-card reveal d5">
+    <img src="/assets/qr-ladica.svg" alt={tt(lang, 'index.qrAlt')} width="82" height="82" />
+    <div class="qx">
+      <b>{tt(lang, 'index.qrTitle')}</b>
+      <span>{tt(lang, 'index.qrSub')}<span class="u">ladica.hrva.cc</span></span>
+    </div>
+  </div>
+
+  <p class="foot reveal d5">{tt(lang, 'index.footNote')}<br>
+    {tt(lang, 'foot.contact')} <a href="mailto:ladica@hrvalabs.net">ladica@hrvalabs.net</a> · <a href={privacyHref}>{tt(lang, 'foot.privacy')}</a><br>
+    <span class="legal" set:html={tt(lang, 'foot.legal')}></span></p>
+</main>
+
+<RegisterSW />
+
+<style is:global>
+  body {
+    background: var(--bg);
+    min-height: 100dvh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 20px;
+    position: relative; overflow-x: hidden;
+  }
+  /* one restrained green glow behind the brand — not a full wash */
+  body::before {
+    content: ""; position: fixed; top: -180px; left: 50%; transform: translateX(-50%);
+    width: 560px; height: 420px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(21,128,61,.16), transparent 70%);
+    filter: blur(6px);
+  }
+</style>
+
+<style>
+  .wrap { width: 100%; max-width: 480px; position: relative; }
+
+  .langtop { position: absolute; top: 0; right: 0; z-index: 2; }
+
+  .brandrow { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px; }
+  .brandrow .by { font-size: 12px; font-weight: var(--w-bold); letter-spacing: .06em; text-transform: uppercase; color: var(--accent-dk); background: var(--soft); padding: 6px 12px; border-radius: 999px; }
+  .head { text-align: center; margin-bottom: 28px; }
+  .mark { width: 66px; height: 66px; border-radius: 20px; background: var(--accent); display: grid; place-items: center; color: #fff; margin: 0 auto 16px; box-shadow: 0 12px 26px rgba(21,128,61,.30); }
+  .mark svg { width: 38px; height: 38px; }
+  .head h1 { margin: 0; font-size: 34px; font-weight: var(--w-heavy); letter-spacing: -0.025em; }
+  .head p { margin: 8px 0 0; color: var(--muted); font-size: 17px; }
+
+  .app-tile { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 26px; box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease; }
+  .app-tile:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(20,45,30,.13); border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); }
+  .app-tile:active { transform: translateY(-1px); }
+  .app-tile:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 3px; }
+  .tile-label { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .tile-label b { font-size: 14px; font-weight: var(--w-heavy); letter-spacing: .02em; text-transform: uppercase; color: var(--muted); }
+  .tile-label .saved { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+  .tile-label .saved svg { width: 14px; height: 14px; color: var(--accent); }
+
+  .preview { background: color-mix(in srgb, var(--bg) 60%, var(--surface)); border: 1px solid var(--border); border-radius: 18px; padding: 12px; }
+  .pchips { display: flex; gap: 6px; margin-bottom: 10px; }
+  .pchip { font-size: 11.5px; font-weight: var(--w-bold); padding: 5px 10px; border-radius: 999px; border: 1.4px solid var(--border); background: var(--surface); display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .pchip.on { border-color: var(--accent); background: var(--soft); color: var(--accent-dk); }
+  .pchip .d { width: 7px; height: 7px; border-radius: 999px; }
+  .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 11px 12px; }
+  .pcat { font-size: 11px; font-weight: var(--w-heavy); display: inline-flex; align-items: center; gap: 5px; color: var(--cat-cook); }
+  .pcat svg { width: 13px; height: 13px; }
+  .pcard .pn { font-weight: var(--w-bold); font-size: 14px; margin-top: 4px; }
+  .pcard .pu { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .popen { margin-top: 9px; background: var(--accent); color: #fff; border-radius: 10px; text-align: center; font-weight: var(--w-bold); font-size: 13px; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .popen svg { width: 13px; height: 13px; }
+
+  .tile-cta { margin-top: 14px; min-height: 54px; background: var(--accent); color: #fff; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 18px; font-weight: var(--w-heavy); letter-spacing: -0.01em; }
+  .tile-cta svg { width: 20px; height: 20px; }
+  .app-tile:hover .tile-cta { background: var(--accent-dk); }
+
+  .install-row { display: flex; justify-content: center; margin-bottom: 14px; }
+
+  .row-tile { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(20,40,30,.04); transition: transform .12s ease, border-color .15s ease; }
+  .row-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+  .row-tile:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 3px; }
+  .row-tile .ri { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--cat-shop) 12%, var(--surface)); color: var(--cat-shop); }
+  .row-tile .ri svg { width: 21px; height: 21px; }
+  .row-tile .rx { flex: 1; min-width: 0; }
+  .row-tile .rx b { display: block; font-size: 16.5px; font-weight: var(--w-bold); letter-spacing: -0.01em; }
+  .row-tile .rx span { color: var(--muted); font-size: 14px; }
+  .row-tile .arw { color: var(--muted); flex: none; }
+  .row-tile .arw svg { width: 20px; height: 20px; }
+
+  .qr-card { display: flex; align-items: center; gap: 15px; margin-top: 18px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 1px 2px rgba(20,40,30,.04); }
+  .qr-card img { width: 82px; height: 82px; flex: none; border-radius: 10px; border: 1px solid var(--border); background: #fff; padding: 5px; }
+  .qr-card .qx b { display: block; font-size: 15.5px; font-weight: var(--w-bold); letter-spacing: -0.01em; }
+  .qr-card .qx span { color: var(--muted); font-size: 13.5px; }
+  .qr-card .qx .u { color: var(--accent-dk); font-weight: var(--w-bold); }
+  .foot { text-align: center; color: var(--muted); font-size: 13px; margin-top: 26px; line-height: 1.65; }
+  .foot a { color: var(--accent-dk); }
+  .foot a:hover { text-decoration: underline; }
+  .foot .legal { display: inline-block; margin-top: 4px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(14px); animation: rise .62s cubic-bezier(.22,.61,.36,1) forwards; }
+    .mark { animation: settle .7s cubic-bezier(.22,.61,.36,1) both; }
+    .d1 { animation-delay: .04s; } .d2 { animation-delay: .12s; } .d3 { animation-delay: .22s; } .d4 { animation-delay: .32s; } .d5 { animation-delay: .42s; }
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @keyframes settle { from { opacity: 0; transform: translateY(8px) scale(.9); } to { opacity: 1; transform: none; } }
+
+  /* Reduced motion: drop the hover lifts as well as the intro animations. */
+  @media (prefers-reduced-motion: reduce) {
+    .app-tile, .row-tile { transition: none; }
+    .app-tile:hover, .app-tile:active, .row-tile:hover { transform: none; }
+  }
+
+  @media (max-width: 380px) { .head h1 { font-size: 30px; } }
+</style>
