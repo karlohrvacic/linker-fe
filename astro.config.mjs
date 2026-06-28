@@ -3,9 +3,12 @@ import svelte from '@astrojs/svelte';
 import sitemap from '@astrojs/sitemap';
 import AstroPWA from '@vite-pwa/astro';
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://ladica.hrva.cc',
+
   // Croatian is the default and stays unprefixed (/, /landing, /privacy);
   // English is the alternate and lives under /en (/en/, /en/landing, /en/privacy).
   i18n: {
@@ -13,6 +16,7 @@ export default defineConfig({
     locales: ['hr', 'en'],
     routing: { prefixDefaultLocale: false },
   },
+
   integrations: [
     svelte(),
     // Keep the app shell and the transient auth callback out of the sitemap —
@@ -53,4 +57,7 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+
+  output: "hybrid",
+  adapter: cloudflare()
 });
