@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "3.2.1",
-    "@astrojs/svelte": "^5.7.3",
+    "@astrojs/svelte": "^9.0.0",
     "astro": "^4.16.18",
     "qrcode": "^1.5.4",
-    "svelte": "^4.2.19"
+    "svelte": "^5.56.4"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/svelte": "^5.2.4",
     "@vite-pwa/astro": "^0.5.0",
